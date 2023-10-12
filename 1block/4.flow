@@ -1,0 +1,33 @@
+import string;
+import ds/set;
+
+ 
+makeCustTree(a: [int]) -> Tree<int,[int]> {
+  foldi(a, makeTree(), \idx, acc, e -> 
+	   setTree(acc,e,arrayPush(lookupTreeDef(acc,e, []), idx)));
+}
+
+inds(a: [int], m: int) -> [Pair<int,int>]
+{
+	tmp = makeCustTree(a);
+	res: ref [Pair<int, int>] = ref [];
+	foldTree(tmp, None(), \key, val, sth -> {
+		len: int = length(val)-1;
+			addVal: [int] = either(lookupTree(tmp, m - key),[]);
+			fori(0, len, \i -> fori(0, length(addVal)-1,\j ->{
+				if (val[i] < addVal[j])
+			 		refArrayPush(res, Pair(val[i], addVal[j]));
+			}));
+
+		sth;
+	});
+	^res;
+}
+main()
+{
+	arr: [int] = [-2, 5, 4, 4, -3, 5, 10, 7, 4, -2];
+  b: [int] = [1, 12, 34, 3, 4, 34];
+	println(arr);
+	println(inds(arr, 8));
+	quit(0);
+}

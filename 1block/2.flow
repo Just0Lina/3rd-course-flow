@@ -1,0 +1,21 @@
+import string;
+import runtime;
+
+ 
+sumOfArray(a: [int]) -> void
+{
+	println("Sum of numbers:");
+	println(fold(a, 0, \x, y -> x + y));
+	println("");
+}
+ 
+main()
+{
+	a: [int] = [1, 2, 3, 4];
+  b: [int] = [1, 12, 3, 4, 34];
+	println(a);
+	sumOfArray(a);
+	println(b);
+  sumOfArray(b);
+	quit(0);
+}

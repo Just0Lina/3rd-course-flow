@@ -1,0 +1,83 @@
+import lingo/pegcode/driver;
+import ds/dlist;
+
+import infix_notation;
+
+export {
+    parseRPN(source: string) -> [RPNExpr];
+	calculateRPN(arr : [RPNExpr]) -> int;
+	translateToInfix(arr : [RPNExpr]) -> Expr;
+	translateToRPN(expr : Expr) -> [RPNExpr];
+	RPNToString(rpn : [RPNExpr]) -> string;
+	RPNExpr ::= Const, OpName;
+	OpName(name : string);
+	// arr : [RPNExpr] = [];
+}
+
+calculateRPN(arr : [RPNExpr]) {
+	calculate(translateToInfix(arr));
+}
+
+translateToInfix(arr : [RPNExpr]) {
+	stack : [Expr] = [];
+	a = fold(arr, stack, \st, val -> {
+		switch (val) {
+			Const(c):
+				arrayPush(st, Const(c));
+			OpName(name): {
+				right = lastElement(st, Const(0));
+				a = removeIndex(st, length(st) - 1);
+				left = lastElement(a, Const(0));
+				b = removeIndex(a, length(a) - 1);
+				arrayPush(b, BinOp(name, left, right));
+			}
+		}
+	});
+	a[0];
+}
+
+translateReq(expr : Expr, rpn : [RPNExpr]) -> [RPNExpr] {
+	switch(expr) {
+		Const(c): arrayPush(rpn, Const(c));
+
+		BinOp(name, l, r): {
+			a = translateReq(l, rpn);
+			b = translateReq(r, a);
+			arrayPush(b, OpName(name));
+		}
+
+		default: arrayPush(rpn, Const(0));
+	}
+}
+
+translateToRPN(expr : Expr) {
+	rpn : [RPNExpr] = [];
+	translateReq(expr, rpn);
+}
+
+RPNToString(rpn : [RPNExpr]) {
+	fold(rpn, "", \str, val -> {
+		switch(val) {
+			Const(c):
+				str+ i2s(c) + " ";
+			OpName(name): {
+				str + name + " ";
+			}
+		}
+	});
+}
+
+
+RPNGrammarOp : ref Maybe<[PegOp]> = ref None();
+
+RPNGrammar() {
+	// Prepare the grammar in the given file using flow syntax for inlining a string from a file
+	// but be sure to only do this once
+	onlyOnce(RPNGrammarOp, \ -> {
+		compilePegGrammar("#include demos/myLabs/2block/6num/postfix_notation.lingo");
+	});
+}
+
+parseRPN(source: string) {
+	parsic(RPNGrammar(), source, defaultPegActions);
+}

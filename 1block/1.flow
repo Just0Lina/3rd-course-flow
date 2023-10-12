@@ -1,0 +1,20 @@
+import string;
+import runtime;
+
+convertToString(a: [int]) -> void
+{
+	println("convertToString:");
+	b = map(a, i2s);
+	c = strGlue(b, ", ");
+  println(a);
+  println(b);
+	println(c);
+}
+ 
+
+main()
+{
+	a: [int] = [1, 2, 3, 4];
+	convertToString(a);
+	quit(0);
+}

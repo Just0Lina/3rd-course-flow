@@ -1,0 +1,43 @@
+import string;
+import math/math;
+import ds/tree;
+import ds/array;
+
+import postfix_notation;
+
+inputVariablesIntoTree() -> Tree<string, double> {
+    variables = strSplit(getUrlParameter("vars"), ",");
+    fold(variables, makeTree(),\ tree, variable -> {setTree(tree, variable, s2d(getUrlParameter(variable)))});
+}
+
+main() {
+	variables : Tree<string, double> = inputVariablesIntoTree();
+    expr = getUrlParameter("expr");
+	usage : string = "Usage: rpn_calculator.flow -- \"expr=<expression>\"  ...";
+	if (expr == "") {
+		println("Expressinon expected");
+		println(usage);
+		quit(-1);
+	} else {
+		println("RPN expression: " + expr);
+		println("\n[RPNExpr]:");
+		rpn1 : [RPNExpr] = parseRPN(expr);
+		println(rpn1);
+		// println(calculateRPN(e, variables));
+		infix = translateToInfix(rpn1);
+		println("\nRPN to infix:");
+		println(infix);
+
+		rpn2 = translateToRPN(infix);
+		println("\nInfix to RPN:");
+		println(rpn2);
+
+		println("\nInfix expression:");
+		println(inf2str(infix) + " = " + i2s(calculateRPN(rpn1)));
+		
+		println("\nRPN expression:");
+		println(RPNToString(rpn2) + " = " + i2s(calculateRPN(rpn1)));
+		
+		quit(0);
+	}
+}

@@ -1,0 +1,89 @@
+import lingo/pegcode/driver;
+import math/math;
+
+export {
+	Expr ::= Const, BinOp, Null;
+	BinOp(name : BinOpType, left: Expr, right: Expr);
+	BinOpType ::= Add, Mul;
+	Add();
+	Mul();
+	Const(value : int);
+	Null();
+  calculate(ex : Expr) -> int;
+  inf2str(ex : Expr, inMul:bool) -> string;
+  parse(source : string) -> Expr;
+	convert(ex : Expr) -> Expr;
+}
+
+
+calculate(ex : Expr) {
+	switch(ex)
+	{
+		Const(c): c;
+		BinOp(name, l, r): {
+		  lv = calculate(l);
+			rv = calculate(r);
+			switch(name)
+			{
+				Add(): lv + rv;
+				Mul(): lv * rv;
+			};		
+		}
+		Null(): 0;
+	}
+}
+
+inf2str(ex : Expr, inMul:bool) {
+	switch(ex) {
+		Const(c): i2s(c);
+		BinOp(name, l, r): switch(name)
+		{
+			Add(): {
+				s = inf2str(l, false) + " + " + inf2str(r, false);
+				if(inMul) "(" + s + ")" else s;
+			}
+			Mul(): inf2str(l, true) + " * " + inf2str(r, true);
+		}
+		Null(): "Null";
+	}
+}
+
+
+convert(ex : Expr) {
+	simp_ex = switch(ex) {
+		BinOp(name, l, r): {
+				simp_l = convert(l);
+				simp_r = convert(r);
+				BinOp(name, simp_l, simp_r);
+			}
+		default: ex;
+	}
+	
+	if (simp_ex == ex) {
+		simp_ex;
+	} else {
+		convert(simp_ex);
+	}
+}
+
+buildOp(xs : [flow]) {
+	fold(xs[2], xs[1], \acc, x -> BinOp(xs[0], acc, x));
+}
+
+arithGrammarOp : ref Maybe<[PegOp]> = ref None();
+
+arithGrammar() {
+	// Prepare the grammar in the given file using flow syntax for inlining a string from a file
+	// but be sure to only do this once
+	onlyOnce(arithGrammarOp, \ -> {
+		compilePegGrammar("#include demos/myLabs/2block/5num/infix_notation.lingo");
+	});
+}
+
+parse(source: string) {
+	specialPegActions = {
+		t1 = setTree(defaultPegActions.t, "buildOp", buildOp);
+		SemanticActions(t1);
+	}
+	parsic(arithGrammar(), source, specialPegActions);
+}

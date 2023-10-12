@@ -1,0 +1,11 @@
+add = ws mul:left ws "+" ws add:right ws { BinOp(Add(), :left, :right) } | mul;
+
+mul = ws atom:left ws rmul+:right { buildOp(Mul(), :left, :right) } | atom;
+rmul = ws "*" ws atom:val ws { :val };
+
+
+atom = ws const:val ws { :val } | ws "(" ws expr:val ws ")" ws { :val };
+expr = ws add:val ws { :val } | ws "(" ws expr:val ws ")" ws { :val };
+
+const = ('0'-'9')+$d { Const(s2i($d)) };
+ws = (' '|'\r'|'\n'|'\t')*;
